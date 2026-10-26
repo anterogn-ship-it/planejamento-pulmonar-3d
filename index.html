@@ -1,0 +1,177 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Planejamento Pulmonar 3D</title><style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e7eff8;background:#0c1522}*{box-sizing:border-box}body{margin:0}header{padding:15px 20px;border-bottom:1px solid #2c3c50;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#121e2d}h1{font-size:19px;margin:0}header small{display:block;color:#a8b7c8;margin-top:4px}.layout{display:grid;grid-template-columns:330px 1fr;height:calc(100vh - 77px);min-height:520px}aside{overflow:auto;padding:19px;background:#142233;border-right:1px solid #304154}main{position:relative;min-width:0;background:#1a2737}#canvas{height:100%;width:100%;display:block}h2{font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#aebed0;margin:22px 0 12px}button,.filebutton{background:#243b55;border:1px solid #46617e;color:#f3f8ff;border-radius:9px;padding:9px 11px;cursor:pointer;font-size:13px}button:hover,.filebutton:hover{background:#315477}button:focus-visible,input:focus-visible{outline:2px solid #77d1ee}.buttons{display:flex;flex-wrap:wrap;gap:7px}.structure{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #263a50;font-size:13px}.structure label{flex:1;cursor:pointer}.structure input{width:17px;height:17px;accent-color:#3ec7d5}.swatch{height:12px;width:12px;border-radius:50%;border:1px solid #6b7c8c}.range{width:100%;accent-color:#4bd0d9}.rangehead{display:flex;justify-content:space-between;font-size:13px;color:#d5e3ee}.status{position:absolute;bottom:16px;left:16px;background:#0d1b2bcf;padding:9px 12px;border:1px solid #3c5269;border-radius:8px;color:#d3e5f5;font-size:12px;max-width:calc(100% - 30px)}.hint{color:#9aafc4;font-size:12px;line-height:1.55}.pill{color:#8de3d6;background:#193f44;border-radius:50px;padding:6px 10px;font-size:11px}#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#1a2737;color:#d4e5f3;z-index:5;text-align:center;padding:25px}.filebutton input{display:none}@media(max-width:760px){.layout{display:flex;flex-direction:column;height:auto}aside{max-height:42vh;min-height:280px}main{height:58vh;min-height:390px}header{flex-wrap:wrap}}
+</style><style id="iphone-responsive-fix">
+/* Layout responsivo: preserva integralmente o carregador 3D original */
+#mobileToggle,#mobileClose{display:none}
+@media(max-width:760px){
+ html,body{height:100%;height:100dvh;overflow:hidden}
+ body{display:flex;flex-direction:column}
+ header{flex:0 0 auto;min-height:66px;padding:10px 12px;flex-wrap:nowrap;gap:8px}
+ header>div{min-width:0;flex:1}header h1{font-size:15px;line-height:1.2}header small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ header .pill{display:none}
+ #mobileToggle{display:block;flex:0 0 auto;font-size:13px;padding:10px 12px;background:#24516c}
+ .layout{display:block;position:relative;flex:1;min-height:0;height:auto;overflow:hidden}
+ main#main{position:absolute;inset:0;width:100%;height:100%;min-height:0;touch-action:none}
+ #canvas{touch-action:none}
+ aside{position:absolute;z-index:12;top:0;bottom:0;left:0;width:min(88vw,370px);max-height:none;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px 18px 36px;transform:translateX(-105%);transition:transform .22s ease;box-shadow:8px 0 30px #0008}
+ body.menu-open aside{transform:translateX(0)}
+ #mobileClose{display:block;float:right;margin:0 0 10px 10px}
+ #mobileBackdrop{display:none;position:absolute;inset:0;background:#0009;z-index:11}
+ body.menu-open #mobileBackdrop{display:block}
+ .status{left:8px;bottom:8px;font-size:10px;max-width:calc(100% - 16px);padding:7px 9px}
+ button,.filebutton{min-height:40px}
+}
+</style><style id="mac-desktop-layout-fix">
+/* Desktop: a camada de fundo do menu móvel não ocupa uma célula da grade. */
+@media (min-width:761px){
+ html,body{height:100%;overflow:hidden}
+ body{display:flex;flex-direction:column}
+ header{flex:0 0 auto}
+ .layout{display:grid;grid-template-columns:340px minmax(0,1fr);grid-template-rows:minmax(0,1fr);flex:1;height:auto;min-height:0;width:100%;overflow:hidden}
+ .layout>aside{grid-column:1;grid-row:1;min-height:0;max-height:none;overflow-y:auto}
+ #mobileBackdrop{display:none!important;position:absolute;pointer-events:none}
+ .layout>main#main{grid-column:2;grid-row:1;min-width:0;min-height:0;width:100%;height:100%;overflow:hidden}
+ #canvas{width:100%;height:100%;display:block}
+}
+</style><style id="background-selector-style">
+.bg-presets{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 12px}.bg-preset{width:35px;height:35px;min-height:35px;padding:0;border-radius:8px;border:2px solid #8195a9;position:relative}.bg-preset[aria-pressed="true"]{outline:2px solid #55d9df;outline-offset:2px}.bg-custom{display:flex;align-items:center;gap:12px;font-size:13px;color:#d5e3ee}.bg-custom input[type="color"]{width:54px;height:38px;padding:2px;border:1px solid #526c86;border-radius:7px;background:#243b55;cursor:pointer}.bg-preset[aria-label="Branco"]{border-color:#c4d1dd}
+</style><link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#121e2d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Pulmão 3D"><link rel="apple-touch-icon" href="./icons/icon-192.png"></head><body><header><div><h1>Planejamento Cirúrgico Pulmonar 3D</h1><small id="modelTitle">Nenhum caso aberto — selecione um arquivo GLB ou glTF</small></div><span class="pill">Visualização interativa</span><button id="mobileToggle" type="button" aria-expanded="false" aria-controls="controlsPanel">☰ Estruturas</button></header><div class="layout"><aside id="controlsPanel"><button id="mobileClose" type="button">✕ Fechar</button><h2>Estruturas anatômicas</h2><div id="structures">Abra um arquivo GLB ou glTF para visualizar as estruturas.</div><h2>Transparência do parênquima</h2><div class="rangehead"><span>Opacidade</span><strong id="opacityValue">30%</strong></div><input class="range" id="opacity" type="range" min="0" max="100" value="30" step="5"><p class="hint">Ajusta apenas os componentes pulmonares. Os vasos, brônquios e tumor permanecem visíveis.</p><h2>Cor de fundo</h2><div class="bg-presets" id="bgPresets" role="group" aria-label="Cores de fundo predefinidas"><button class="bg-preset" type="button" data-bg="#1a2737" aria-label="Azul-escuro original" title="Azul-escuro original (padrão)" style="background:#1a2737"></button><button class="bg-preset" type="button" data-bg="#182838" aria-label="Azul-escuro alternativo" title="Azul-escuro alternativo" style="background:#182838"></button><button class="bg-preset" type="button" data-bg="#000000" aria-label="Preto" title="Preto" style="background:#000000"></button><button class="bg-preset" type="button" data-bg="#777777" aria-label="Cinza" title="Cinza" style="background:#777777"></button><button class="bg-preset" type="button" data-bg="#ffffff" aria-label="Branco" title="Branco" style="background:#ffffff"></button><button class="bg-preset" type="button" data-bg="#dceefa" aria-label="Azul-claro" title="Azul-claro" style="background:#dceefa"></button></div><label class="bg-custom" for="bgColor">Cor personalizada <input id="bgColor" type="color" value="#1a2737" aria-label="Escolher cor de fundo"></label><p class="hint">Altera apenas o fundo da reconstrução 3D. A cor escolhida acompanha o caso exportado.</p><h2>Exibição rápida</h2><div class="buttons"><button id="all">Mostrar tudo</button><button id="vessels">Apenas vasos</button><button id="airway">Apenas brônquios</button><button id="tumor">Isolar tumor</button><button id="lung">Pulmão + tumor</button></div><h2>Visualização</h2><div class="buttons"><button id="fit">Enquadrar modelo</button><button id="reset">Restaurar padrão</button><button id="shot">Salvar imagem PNG</button><button id="exportCase" style="background:#176d73;border-color:#53aeb3">⬇ Exportar caso 3D</button><button id="full">Tela cheia</button></div><p class="hint" id="exportHelp">Exportar caso 3D cria um HTML com a reconstrução atualmente aberta, pronto para enviar a um colega. Requer internet para a biblioteca 3D.</p><h2>Outro caso</h2><label class="filebutton">Abrir arquivo .gltf ou .glb<input type="file" id="file" accept=".gltf,.glb"></label><p class="hint">O arquivo selecionado é lido localmente no navegador. Para arquivos glTF com recursos externos, prefira exportação com buffers incorporados.</p><h2>Uso e compartilhamento</h2><p class="hint">Este aplicativo inicia sem casos clínicos incorporados. Os arquivos selecionados são lidos localmente no dispositivo. Antes de exportar ou compartilhar um caso, confirme sua desidentificação e autorização de uso.</p><p class="hint">A identificação anatômica de Segment_1, Segment_2 e Segment_3 deve ser confirmada no 3D Slicer. Esta ferramenta é um auxílio à revisão, não um sistema médico validado.</p></aside><div id="mobileBackdrop"></div><main id="main"><canvas id="canvas"></canvas><div id="loading">Nenhum modelo carregado. Use “Abrir arquivo .gltf ou .glb” no painel à esquerda (ou em ☰ Estruturas no iPhone).</div><div class="status" id="status">Arraste para girar • Dois dedos para zoom/deslocar</div></main></div>
+<script id="embedded" type="text/plain"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const canvas=document.querySelector('#canvas'),main=document.querySelector('#main'),renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(document.querySelector('#bgColor').value);renderer.outputColorSpace=THREE.SRGBColorSpace;
+// Cor de fundo: atualização imediata sem modificar materiais anatômicos.
+const bgColorInput=document.querySelector('#bgColor');
+function applyBackground(color){
+ if(!/^#[0-9a-fA-F]{6}$/.test(color))return;
+ bgColorInput.value=color;bgColorInput.setAttribute('value',color);
+ renderer.setClearColor(color,1);main.style.backgroundColor=color;
+ document.querySelector('#loading').style.backgroundColor=color;
+ document.querySelectorAll('.bg-preset').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bg.toLowerCase()===color.toLowerCase())));
+}
+document.querySelectorAll('.bg-preset').forEach(b=>b.addEventListener('click',()=>applyBackground(b.dataset.bg)));
+bgColorInput.addEventListener('input',()=>applyBackground(bgColorInput.value));
+applyBackground(bgColorInput.value);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,.01,1e7),controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.08;
+scene.add(new THREE.HemisphereLight(0xffffff,0x58677b,2.1));const key=new THREE.DirectionalLight(0xffffff,2.1);key.position.set(1,2,3);scene.add(key);const fill=new THREE.DirectionalLight(0xc0dcff,.9);fill.position.set(-2,-1,-2);scene.add(fill);
+let root=null,parts=[],bounds=null,currentModelBytes=null,currentModelName="";const ui=document.querySelector('#structures'),opacity=document.querySelector('#opacity');
+// Reconhecimento de nomenclaturas do 3D Slicer em português e inglês.
+const normalizeName=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[_\-]+/g,' ').trim();
+const isLung=n=>{const x=normalizeName(n);return /^(?:segment(?:o|os)?(?:\s|\d|$)|lobo(?:\s|$)|lobos(?:\s|$)|lingula(?:\s|$)|lobe(?:\s|$)|middle\s+lobe|inferior\s+lobe|superior\s+lobe|upper\s+lobe|lower\s+lobe|lung(?:\s|$)|pulmao(?:\s|$)|parenquima(?:\s|$))/.test(x)};
+const group=n=>{const x=normalizeName(n);return /artery|arteria|vein|veia|vascular|vasos/.test(x)?'vessels':/bronch|bronqu|trachea|traqueia|airway/.test(x)?'airway':/tumor|nodule|nodulo|lesion|lesao/.test(x)?'tumor':isLung(n)?'lung':'other'};
+function setOpacity(){
+ const val=Number(opacity.value)/100;
+ document.querySelector('#opacityValue').textContent=Math.round(val*100)+'%';
+ for(const p of parts){
+  if(group(p.name)!=='lung')continue;
+  p.mesh.traverse(o=>{
+   if(!o.isMesh)return;
+   for(const mat of (Array.isArray(o.material)?o.material:[o.material])){
+    if(!mat)continue;
+    mat.opacity=val;
+    mat.transparent=val<1;
+    mat.depthWrite=val>=1;
+    mat.needsUpdate=true;
+   }
+  });
+ }
+}
+function updateUI(){ui.innerHTML='';parts.forEach((p,i)=>{const row=document.createElement('div');row.className='structure';const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.mesh.visible;cb.id='s'+i;cb.addEventListener('change',()=>p.mesh.visible=cb.checked);const sw=document.createElement('span');sw.className='swatch';const material=p.mesh.material||(p.mesh.children.find(c=>c.material)||{}).material;const color=Array.isArray(material)?material[0]?.color:material?.color;sw.style.background=color?'#'+color.getHexString():'#829aaf';const label=document.createElement('label');label.htmlFor=cb.id;label.textContent=p.name;row.append(cb,sw,label);ui.append(row)})}
+function showFilter(filter){parts.forEach(p=>p.mesh.visible=filter(p));updateUI()}
+function fit(){if(!root)return;const b=new THREE.Box3().setFromObject(root);if(b.isEmpty())return;const center=b.getCenter(new THREE.Vector3()),size=b.getSize(new THREE.Vector3()),radius=Math.max(size.length()*.5,.1),distance=radius/Math.sin(THREE.MathUtils.degToRad(camera.fov/2))*1.2;const direction=new THREE.Vector3(1,.65,1).normalize();camera.position.copy(center).addScaledVector(direction,distance);controls.target.copy(center);camera.near=Math.max(.001,distance/1000);camera.far=distance*30;camera.updateProjectionMatrix();controls.update()}
+function parse(bytes,name){document.querySelector('#loading').style.display='flex';document.querySelector('#loading').textContent='Carregando o modelo…';const loader=new GLTFLoader();loader.parse(bytes,'',gltf=>{currentModelBytes=bytes instanceof ArrayBuffer?bytes.slice(0):bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);currentModelName=name;const exportButton=document.querySelector('#exportCase');if(exportButton){pendingIOSExport=null;exportButton.textContent='⬇ Exportar caso 3D';}if(root)scene.remove(root);root=gltf.scene;scene.add(root);parts=[];root.traverse(o=>{if(!o.isMesh)return;const n=o.name||'Malha';o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();parts.push({name:n,mesh:o})});parts.sort((a,b)=>a.name.localeCompare(b.name, 'pt'));opacity.value=30;setOpacity();updateUI();fit();document.querySelector('#modelTitle').textContent=name+' • '+parts.length+' estruturas';document.querySelector('#loading').style.display='none'},e=>{document.querySelector('#loading').textContent='Erro ao abrir arquivo: '+e.message;console.error(e)})}
+function resize(){const w=main.clientWidth,h=main.clientHeight;if(w<1||h<1)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}window.addEventListener('focus',()=>requestAnimationFrame(resize));document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestAnimationFrame(resize)});new ResizeObserver(resize).observe(main);resize();function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
+opacity.addEventListener('input',setOpacity);document.querySelector('#all').onclick=()=>showFilter(()=>true);document.querySelector('#vessels').onclick=()=>showFilter(p=>group(p.name)==='vessels');document.querySelector('#airway').onclick=()=>showFilter(p=>group(p.name)==='airway');document.querySelector('#tumor').onclick=()=>showFilter(p=>group(p.name)==='tumor');document.querySelector('#lung').onclick=()=>showFilter(p=>['lung','tumor'].includes(group(p.name)));document.querySelector('#fit').onclick=fit;document.querySelector('#reset').onclick=()=>{showFilter(()=>true);opacity.value=30;setOpacity();fit()};document.querySelector('#full').onclick=()=>{if(!document.fullscreenElement)main.requestFullscreen();else document.exitFullscreen()};document.querySelector('#shot').onclick=()=>{renderer.render(scene,camera);const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='planejamento_pulmonar.png';a.click()};document.querySelector('#file').addEventListener('change',async e=>{const f=e.target.files[0];if(f)parse(await f.arrayBuffer(),f.name)});
+
+// Exportação de caso de visualização: sem abertura de outros arquivos nem reexportação.
+let pendingIOSExport=null;
+function downloadExportBlob(blob,filename){
+ const url=URL.createObjectURL(blob),link=document.createElement('a');
+ link.href=url;link.download=filename;link.style.display='none';document.body.appendChild(link);link.click();
+ setTimeout(()=>{link.remove();URL.revokeObjectURL(url);},120000);
+}
+async function exportCurrentCase(){
+ const button=document.querySelector('#exportCase');
+ if(pendingIOSExport){
+  // A chamada a navigator.share ocorre imediatamente no gesto do segundo toque.
+  const {file,filename}=pendingIOSExport;
+  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+   try{
+    await navigator.share({files:[file],title:'Planejamento Pulmonar 3D'});
+    document.querySelector('#exportHelp').textContent='Compartilhamento concluído ou encaminhado ao destino selecionado.';
+    pendingIOSExport=null;button.textContent='⬇ Exportar caso 3D';
+   }catch(err){
+    if(err.name!=='AbortError'){
+     console.warn('Compartilhamento não disponível:',err);
+     document.querySelector('#exportHelp').textContent='Este visualizador bloqueou o compartilhamento. Abra o HTML no Safari e tente novamente. Como alternativa, utilize a exportação no Mac.';
+    }
+   }
+  }else{
+   // Fallback: disponível apenas onde o navegador autoriza downloads de arquivos locais.
+   downloadExportBlob(file,filename);
+   document.querySelector('#exportHelp').textContent='Download solicitado. Se o iPhone bloquear, abra a ferramenta no Safari ou exporte pelo Mac.';
+  }
+  return;
+ }
+ if(!currentModelBytes){alert('Abra primeiro um arquivo GLB ou glTF para exportar o caso.');return;}
+ const originalText=button.textContent;button.disabled=true;button.textContent='Preparando arquivo…';
+ try{
+  const reader=new FileReader();
+  const base64=await new Promise((resolve,reject)=>{
+   reader.onload=()=>resolve(String(reader.result).split(',')[1]);
+   reader.onerror=()=>reject(reader.error||new Error('Falha na leitura do modelo'));
+   reader.readAsDataURL(new Blob([currentModelBytes],{type:'application/octet-stream'}));
+  });
+  const doc=document.documentElement.cloneNode(true);
+  const exportedCanvas=doc.querySelector('#canvas');if(exportedCanvas){exportedCanvas.removeAttribute('width');exportedCanvas.removeAttribute('height');}
+  const embedded=doc.querySelector('#embedded');embedded.textContent=base64;
+  embedded.setAttribute('data-filename',encodeURIComponent(currentModelName));
+  // Retira os comandos da interface compartilhada, inclusive textos explicativos.
+  for(const id of ['exportCase','exportHelp','file']){
+   const el=doc.querySelector('#'+id);if(el)el.remove();
+  }
+  const fileHeading=[...doc.querySelectorAll('h2')].find(el=>el.textContent.trim()==='Outro caso');
+  if(fileHeading){let next=fileHeading.nextElementSibling;while(next&&next.tagName!=='H2'){const remove=next;next=next.nextElementSibling;remove.remove();}fileHeading.remove();}
+  // Elimina o próprio código de exportação e o seletor de arquivos do HTML enviado.
+  const module=doc.querySelector('script[type="module"]');
+  module.textContent=module.textContent
+   .replace(/document\.querySelector\('#file'\)\.addEventListener\('change',[^\n]*\n/, '')
+   .replace(/\/\/ Exportação de caso de visualização:[\s\S]*?(?=try\{const b64=)/, '')
+   .replace(/pendingIOSExport=null;/g, '');
+  doc.querySelector('#modelTitle').textContent=currentModelName+' • caso compartilhado';
+  const html='<!doctype html>\n'+doc.outerHTML;
+  const safeName=currentModelName.replace(/\.(gltf|glb)$/i,'').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,70)||'Caso_Pulmonar';
+  const filename='Planejamento_3D_'+safeName+'.html';
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  // Mac: mantém o download tradicional. iPhone: prepara arquivo para compartilhamento nativo.
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(isIOS){
+   const file=new File([blob],filename,{type:'text/html'});
+   // O compartilhamento requer um SEGUNDO toque: o primeiro prepara o arquivo
+   // e o segundo preserva a ativação do usuário exigida pelo iOS.
+   pendingIOSExport={file,filename};
+   button.textContent='Compartilhar caso 3D';
+   document.querySelector('#exportHelp').textContent='Arquivo preparado. Toque novamente em “Compartilhar caso 3D” e escolha “Salvar em Arquivos”, AirDrop ou outro destino. Se estiver no Visualizador HTML do Arquivos, abra este HTML no Safari caso o compartilhamento seja bloqueado.';
+  }else{
+   downloadExportBlob(blob,filename);
+   document.querySelector('#exportHelp').textContent='Download solicitado: '+filename+' — confira a seta de downloads do Safari e a pasta Downloads.';
+  }
+ }catch(err){console.error(err);alert('Não foi possível exportar o caso: '+err.message)}
+ finally{button.disabled=false;if(!pendingIOSExport)button.textContent=originalText;}
+}
+document.querySelector('#exportCase').addEventListener('click',exportCurrentCase);
+
+try{const embeddedNode=document.querySelector('#embedded');const b64=embeddedNode.textContent.trim();if(b64){const binary=atob(b64),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);parse(bytes.buffer,decodeURIComponent(embeddedNode.getAttribute('data-filename')||'Caso_Pulmonar.gltf'));}}catch(e){document.querySelector('#loading').textContent='Falha ao iniciar: '+e.message;console.error(e)}
+</script><script>
+(function(){
+ const toggle=document.getElementById('mobileToggle'),close=document.getElementById('mobileClose'),backdrop=document.getElementById('mobileBackdrop');
+ function menu(open){document.body.classList.toggle('menu-open',open);toggle.setAttribute('aria-expanded',String(open));}
+ toggle.addEventListener('click',()=>menu(!document.body.classList.contains('menu-open')));
+ close.addEventListener('click',()=>menu(false));backdrop.addEventListener('click',()=>menu(false));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')menu(false)});
+ window.addEventListener('orientationchange',()=>menu(false));
+})();
+</script><script>if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) {window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('PWA: cache indisponível',e)));}</script></body></html>
